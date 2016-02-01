@@ -124,54 +124,63 @@ $simdb2[$key]['link']=$simdb2[$key]['custom'];
   }
   /* $CONNECT THE DOTS */
  unset($value);$parent =0;
-  foreach (@$simdb2 as $key => $value) {$found = false;
-$task_id=1 + $key;	
-if($key==0){
-	$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
-	$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
-	$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
-	$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
-}
+foreach (@$simdb2 as $key => $value) {$found = false;
+	$task_id=1 + $key;	
+	if($key==0){
+		$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
+		$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
+		$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
+		$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
+		$simdb2[$key]['parent']=$parent;
+	}
 	
-if($simdb2[$key]['level'] == 0 ){
-	
-	$tasks[0][$task_id]['link']=$simdb2[$key]['link'];	
-	$tasks[0][$task_id]['text']=$simdb2[$key]['text'];
-	$tasks[0][$task_id]['level']=$simdb2[$key]['level'];
-	$tasks[0][$task_id]['link_text']=$simdb2[$key]['link_text'];
-		}else if(($simdb2[$key]['level'] == $simdb2[$key -1]['level']) and $key !==0){
-			$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
-			$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
-			$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
-			$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
-		}else if(($simdb2[$key]['level'] > $simdb2[$key -1]['level']) and $key !==0){
-			$parent = $key;//maybeecho
-			$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
-			$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];	
-			$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];	
-			$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
-		}else if($key !==0){//if level is lower than previous: lookup parentid
-			/*echo'<br>level drop:'.$levdrop=($simdb2[$key]['level']) - ($simdb2[$key]['level']);//echo'level drop<br>';*/
-			$countdown=$key;
-			while(--$countdown > 0 and ($found === false)){
-				if( (($simdb2[$key]['level'])) == ($simdb2[$countdown]['level'])and $simdb2[$key]['level']!==0 and $found == false){
+	if($simdb2[$key]['level'] == 0 ){
+		$tasks[0][$task_id]['link']=$simdb2[$key]['link'];	
+		$tasks[0][$task_id]['text']=$simdb2[$key]['text'];
+		$tasks[0][$task_id]['level']=$simdb2[$key]['level'];
+		$tasks[0][$task_id]['link_text']=$simdb2[$key]['link_text'];
+		$simdb2[$key]['parent']=0;
+			
+	}else if(($simdb2[$key]['level'] == $simdb2[$key -1]['level']) and $key !==0){
+		$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
+		$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
+		$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
+		$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
+		$simdb2[$key]['parent']=$parent;
+
+	}else if(($simdb2[$key]['level'] > $simdb2[$key -1]['level']) and $key !==0){
 		
-					/*echo'<br>countdown=:'.*/$parent=$countdown -1;			
-					$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
-					$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
-					$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];	
-					$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];					
-					if($parent<0){$parent=0;}//.'first';
-					$found = true;
-					//if($levdrop ==1){$parent=1;}
-			}if($simdb2[$countdown]['level']==0 and $found == false){/*echo'<br>countdown0=:'.*/$parent=$countdown;if($parent<0){$parent=0;}
-			$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
-			$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
-			$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
-			$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
-			$found = true;}
+		$parent = $key;
+		$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
+		$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];	
+		$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];	
+		$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
+		$simdb2[$key]['parent']=$parent;
+	}else if($key !==0){//if level is lower than previous: lookup parentid
+		$countdown=$key;
+		while(--$countdown> 0 and ($found === false)){
+
+			if( (($simdb2[$key]['level'])) == ($simdb2[$countdown]['level'])and $simdb2[$key]['level']!==0){//finds first occurance of same level, needs to find that ones parent
+				$parent= $simdb2[$countdown]['parent'];			
+				$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
+				$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
+				$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];	
+				$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];		
+				$simdb2[$key]['parent']=$parent;					
+				if($parent<0){$parent=0;}//.'first';
+				$found = true;
+			}
+			if($simdb2[$countdown]['level']==0 and $found == false){
+				$parent=$countdown;if($parent<0){$parent=0;}
+				$tasks[$parent][$task_id]['link']=$simdb2[$key]['link'];
+				$tasks[$parent][$task_id]['text']=$simdb2[$key]['text'];
+				$tasks[$parent][$task_id]['level']=$simdb2[$key]['level'];
+				$tasks[$parent][$task_id]['link_text']=$simdb2[$key]['link_text'];
+				$simdb2[$key]['parent']=$parent;
+				$found = true;
 			}
 		}
+	}
 }
 		
 	/* echo '<pre>';
